@@ -14,7 +14,11 @@ inline boost::circular_buffer<cv::Scalar> create_color_palette(int n, double sca
   for(int i=0; i<n; i++) {
     palette.push_back(cv::Vec3b((180.0 / (n+1)) * i, 220, 220));
   }
-  cv::cvtColor(palette, palette, CV_HSV2BGR);
+  #if (CV_VERSION_MAJOR >= 4)
+    cv::cvtColor(palette, palette, cv::COLOR_HSV2BGR);
+  #else
+    cv::cvtColor(palette, palette, CV_HSV2BGR);
+  #endif
 
   boost::circular_buffer<cv::Scalar> hsv(n);
   double s = scale / 255.0;
