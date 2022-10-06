@@ -158,22 +158,24 @@ private:
   }
 
   void globalmap_callback(const sensor_msgs::PointCloud2ConstPtr& points_msg) {
-    NODELET_INFO("globalmap received!");
-    pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>());
-    pcl::fromROSMsg(*points_msg, *cloud);
-    globalmap = cloud;
+    if(!globalmap) {
+      NODELET_INFO("globalmap received!");
+      pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>());
+      pcl::fromROSMsg(*points_msg, *cloud);
+      globalmap = cloud;
 
-    NODELET_INFO("background subtractor constructed");
-    double backsub_resolution = private_nh.param<double>("backsub_resolution", 0.2);
-    int backsub_occupancy_thresh = private_nh.param<int>("backsub_occupancy_thresh", 2);
+      NODELET_INFO("background subtractor constructed");
+      double backsub_resolution = private_nh.param<double>("backsub_resolution", 0.2);
+      int backsub_occupancy_thresh = private_nh.param<int>("backsub_occupancy_thresh", 2);
 
-    backsub.reset(new BackgroundSubtractor());
-    backsub->setVoxelSize(backsub_resolution, backsub_resolution, backsub_resolution);
-    backsub->setOccupancyThresh(backsub_occupancy_thresh);
-    backsub->setBackgroundCloud(globalmap);
+      backsub.reset(new BackgroundSubtractor());
+      backsub->setVoxelSize(backsub_resolution, backsub_resolution, backsub_resolution);
+      backsub->setOccupancyThresh(backsub_occupancy_thresh);
+      backsub->setBackgroundCloud(globalmap);
 
-    backsub_voxel_markers_pub.publish(backsub->create_voxel_marker());
-    backsub_voxel_points_pub.publish(backsub->voxels());
+      backsub_voxel_markers_pub.publish(backsub->create_voxel_marker());
+      backsub_voxel_points_pub.publish(backsub->voxels());
+    }
   }
 
 private:
